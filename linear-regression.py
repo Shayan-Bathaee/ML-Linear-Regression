@@ -1,6 +1,7 @@
 # Overview: This program was written to perform linear regresson on a data set to find the line of best fit. To do so, it uses 
 # gradient descent. Currently, the data is generated randomly.
-# Written by Shayan Bathaee, 1/13/2022
+# Creation Date: 1/13/2022
+# Author: Shayan Bathaee
 # Concepts were inspired by the following article: https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931
 
 
