@@ -8,12 +8,26 @@
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
+import sys
 
 # DEFINE PARAMETERS
-limit = False # set to true if you would like to limit the iterations 
-iterations = 50 # number of desired iterations (only applies if limit is True)
-learningRate = 0.001
+if "-l" in sys.argv:
+    iterations = int(sys.argv[sys.argv.index('-l') + 1])
+    limit = True
+else:
+    limit = False # set to true if you would like to limit the iterations 
+
+if "-lr" in sys.argv:
+    learningRate = float(sys.argv[sys.argv.index('-lr') + 1])
+else:
+    learningRate = 0.005
+
+if "-i" in sys.argv:
+    print("need to do something with input")
+else:
+    print("Use Default input")
 Range = 20 # define how big the graph is
+
 
 # DEFINE CLASS TO PERFORM REGRESSION
 class Regression:
@@ -21,7 +35,7 @@ class Regression:
         self.limit = limit
         self.iterations = iterations
         self.learningRate = learningRate
-        self.m = self.b = 0 
+        self.m = self.b = 0
         self.Range = Range
         self.X = np.arange(0, Range + 1, 1) # X is a numpy array of integers 0 through Range
         self.Y = self.m*self.X + self.b # this stores the data for the predicted line. It just starts as 0
