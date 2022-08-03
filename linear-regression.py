@@ -10,7 +10,7 @@ import matplotlib.animation as animation
 import numpy as np
 
 # DEFINE PARAMETERS
-limit = False # set to true if you would like to limit the iterations 
+limit = True # set to true if you would like to limit the iterations 
 iterations = 50 # number of desired iterations (only applies if limit is True)
 learningRate = 0.001
 Range = 20 # define how big the graph is
@@ -47,44 +47,42 @@ class Regression:
         self.db = (-2/n)*self.db # scaling part of derivative with respect to b
         self.m = self.m - self.learningRate*self.dm # adjust m and b using the derivative values and learning rate
         self.b = self.b - self.learningRate*self.db
-
-    def linearRegression():
-        print("CODE THAT PERFORMS GRADIENT DESCENT ON OUR LINE")
         
-                
+
 # INITIALIZE THE REGRESSION, INITIALIZE THE PLOT
 LR = Regression(limit, iterations, learningRate, Range)
-fig, ax = plt.subplots() # essentially goes like this: create a figure, make ax the only subplot
-global display
-display = ax.text(0, Range, "m = 0, b = 0, iterations = 0")
-X = LR.X # X is a numpy array of integers 0 thorugh Range
+fig, ax = plt.subplots() # create a figure, make ax the only subplot
+ax.grid()
+# plt.figtext(0.5, 1, 'weertwer', ha="center", va="center")
+dataText = ax.text(0.02, 0.86, 'weertwer', transform=ax.transAxes, backgroundcolor="white")
+X = LR.X # X is a numpy array of integers 0 through Range
 Y = LR.data # Y is a numpy array of random numbers within [0, Range]
 line, = ax.plot(X, 0*X) # start by plotting the line at 0
+count = 0
+
 
 # DEFINE FUNCTIONS USED FOR ANIMATION
 def init(): # Initialize the animation
-    global count
-    count = 0
     line.set_ydata(LR.m*X) # let y = 0
-    return line, # return the line
+    dataText.set_text("m = 0\nb = 0\niterations = 0")
+    return line, dataText # return the line 
 
 def animate(i): # This function determines what changes in each frame
-    LR.learn() # use gradient descent to update m and b
-    line.set_ydata(LR.m*X + LR.b) # reset the line with our new m and b
-    global count
-    count += 1
-    if count == iterations and LR.limit == True:
+    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\niterations = " + str(i)
+    if i == iterations and LR.limit == True:
         # display the final slope, y intercept, and iterations
-        displayString = "m = " + str(round(LR.m, 2)) + ", b = " + str(round(LR.b, 2)) + ", iterations = " + str(count)
         print(displayString)
         ani.event_source.stop() # stop if we reach our iteration count and limit is true
-    return line, # return 
+    LR.learn() # use gradient descent to update m and b
+    line.set_ydata(LR.m*X + LR.b) # reset the line with our new m and b
+    dataText.set_text(displayString)
+    return line, dataText # return 
 
 
 # BEGIN ANIMATION AND PLOTTING
-ani = animation.FuncAnimation(fig, animate, init_func = init, interval = 1, blit = True, save_count=2)
+ani = animation.FuncAnimation(fig, animate, init_func = init, interval = 1, blit = True)
 plt.plot(X, Y, 'bo') # plot the data points
-plt.ylim([0, LR.Range]) # set the limits of the graph depending on our range
+plt.ylim([0, 1.2*LR.Range]) # set the limits of the graph depending on our range (extra space added above for labels)
 plt.xlim([0, LR.Range])
 plt.show() # display the plot an animation
 # display the final slope, y intercept, and iterations
