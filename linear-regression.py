@@ -39,10 +39,10 @@ class Regression:
         self.limit = limit
         self.iterations = iterations
         self.learningRate = learningRate
-        self.X = np.array([3,4,5,8])
-        self.Y = np.array([3,4,5,8])
-        # self.X = np.array(dataDictionary[xname])       
-        # self.Y = np.array(dataDictionary[yname])       
+        # self.X = np.array([3,4,5,8])
+        # self.Y = np.array([3,4,5,8])
+        self.X = np.array(dataDictionary[xname])       
+        self.Y = np.array(dataDictionary[yname])       
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
@@ -78,7 +78,7 @@ else:
 if "-lr" in sys.argv:
     learningRate = float(sys.argv[sys.argv.index('-lr') + 1])
 else:
-    learningRate = 0.005
+    learningRate = 0.001
 
 if "-i" in sys.argv:
     filename = str(sys.argv[sys.argv.index('-i') + 1])
