@@ -40,8 +40,8 @@ class Regression:
         self.iterations = iterations
         self.learningRate = learningRate
         self.m = self.b = 0
-        self.X = np.array([3,4,5,6])
-        self.Y = np.array([3,4,5,6])
+        self.X = np.array([3,4,5,8])
+        self.Y = np.array([3,4,5,8])
         # self.X = np.array(dataDictionary[xname])       
         # self.Y = np.array(dataDictionary[yname])       
         self.numDatapoints = len(self.X)                # the number of X Y pairs we hae
