@@ -43,8 +43,10 @@ class Regression:
         self.loss = 0
         # self.X = np.array([3,4,5,8])
         # self.Y = np.array([3,4,5,9])
-        self.X = np.array(dataDictionary[xname])       
-        self.Y = np.array(dataDictionary[yname])       
+        self.X = np.array(dataDictionary[xname])
+        self.Y = np.array(dataDictionary[yname])
+        self.X = self.X - np.min(self.X)
+        self.Y = self.Y - np.min(self.Y)
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
