@@ -3,6 +3,7 @@
 # Creation Date: 1/13/2022
 # Author: Shayan Bathaee
 # Concepts were inspired by the following article: https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931
+# along with https://www.geeksforgeeks.org/gradient-descent-in-linear-regression/
 
 
 from ctypes import wstring_at
@@ -39,14 +40,15 @@ class Regression:
         self.limit = limit
         self.iterations = iterations
         self.learningRate = learningRate
+        self.loss = 0
         # self.X = np.array([3,4,5,8])
-        # self.Y = np.array([3,4,5,8])
+        # self.Y = np.array([3,4,5,9])
         self.X = np.array(dataDictionary[xname])       
         self.Y = np.array(dataDictionary[yname])       
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
-        self.predictedLine = self.m*self.X + self.b     # this stores the data for the predicted line. It just starts as 0
+        self.predictedY = self.m*self.X + self.b        # this stores the data for the predicted line. It just starts as 0
 
     def calculateLoss(self):
         self.loss = 0                                                       # initialize the loss to 0
@@ -55,16 +57,22 @@ class Regression:
         self.loss = self.loss / self.numDatapoints                          # divide the summation by number of datapoints to get average loss
         return self.loss
 
-    def learn(self):
-        self.dm = 0                                                 # initialize derivatives to 0
+    def updatePrediction(self):
+        self.predictedY = self.m*self.X + self.b
+
+    def applyGradientDescent(self):
+        self.dm = 0                                                         # initialize derivatives to 0
         self.db = 0
         for i in range(self.numDatapoints):                                         # for each data point
-            self.dm += self.X[i]*(self.Y[i] - (self.m*self.X[i] + self.b))          # summation part of derivative with respect to m
-            self.db += self.Y[i] - (self.m*self.X[i] + self.b)                      # summation part of derivative with respect to b
+            self.dm += (self.X[i]*(self.Y[i] - self.predictedY[i]))                 # summation part of derivative with respect to m
+            self.db += (self.Y[i] - self.predictedY[i])                             # summation part of derivative with respect to b
         self.dm = (-2/self.numDatapoints)*self.dm                                   # scaling part of derivative with respect to m
         self.db = (-2/self.numDatapoints)*self.db                                   # scaling part of derivative with respect to b
         self.m = self.m - self.learningRate*self.dm                                 # adjust m and b using the derivative values and learning rate
         self.b = self.b - self.learningRate*self.db
+        self.calculateLoss()
+        self.updatePrediction()
+
         
 
 # DEFINE PARAMETERS
@@ -93,7 +101,7 @@ LR = Regression(limit, iterations, learningRate, dataDictionary)
 fig, ax = plt.subplots()                                # create a figure, make ax the only subplot
 ax.grid()
 dataText = ax.text(0.02, 0.86, 'm = 0\nb = 0\niterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
-line, = ax.plot(LR.X, LR.predictedLine)                 # starting line is y = minimum y value
+line, = ax.plot(LR.X, LR.predictedY)                 # starting line is y = minimum y value
 count = 0
 consoleOutput = ""
 
@@ -105,12 +113,12 @@ def init():                                             # Initialize the animati
 
 def animate(i):                                         # This function determines what changes in each frame
     global count, consoleOutput
-    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\niterations = " + str(i)
+    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\nloss = " + str(LR.loss) + "\niterations = " + str(i)
     if i == iterations and LR.limit == True:
         consoleOutput = displayString
         ani.event_source.stop()                         # stop if we reach our iteration count and limit is true
-    LR.learn()                                          # use gradient descent to update m and b
-    line.set_ydata(LR.m*LR.X + LR.b)                    # reset the line with our new m and b
+    LR.applyGradientDescent()                           # use gradient descent to update m and b
+    line.set_ydata(LR.predictedY)                       # reset the line with our new m and b
     dataText.set_text(displayString)
     count += 1
     return line, dataText
@@ -129,5 +137,5 @@ plt.show()                                              # display the plot an an
 
 # display the final slope, y intercept, and iterations
 if consoleOutput == "":
-    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\niterations = " + str(count)
+    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\nloss = " + str(LR.loss) + "\niterations = " + str(count)
 print(consoleOutput)
