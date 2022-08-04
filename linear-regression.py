@@ -39,30 +39,31 @@ class Regression:
         self.limit = limit
         self.iterations = iterations
         self.learningRate = learningRate
-        self.m = self.b = 0
         self.X = np.array([3,4,5,8])
         self.Y = np.array([3,4,5,8])
         # self.X = np.array(dataDictionary[xname])       
         # self.Y = np.array(dataDictionary[yname])       
-        self.numDatapoints = len(self.X)                # the number of X Y pairs we hae
+        self.m = 0
+        self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
+        self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
         self.predictedLine = self.m*self.X + self.b     # this stores the data for the predicted line. It just starts as 0
 
     def calculateLoss(self):
-        self.loss = 0                                               # initialize the loss to 0
-        for x in range(self.numDatapoints):                         # for each data point
-            self.loss += (self.Y[x] - (self.m*x + self.b)) ** 2     # calculate the squared error
-        self.loss = self.loss / self.numDatapoints                  # divide the summation by number of datapoints to get average loss
+        self.loss = 0                                                       # initialize the loss to 0
+        for i in range(self.numDatapoints):                                 # for each data point
+            self.loss += (self.Y[i] - (self.m*self.X[i] + self.b)) ** 2     # calculate the squared error (actual Y - predicted Y) ^ 2
+        self.loss = self.loss / self.numDatapoints                          # divide the summation by number of datapoints to get average loss
         return self.loss
 
     def learn(self):
         self.dm = 0                                                 # initialize derivatives to 0
         self.db = 0
-        for x in range(self.numDatapoints):                         # for each data point
-            self.dm += x*(self.Y[x] - (self.m*x + self.b))          # summation for derivative with respect to m
-            self.db += self.Y[x] - (self.m*x + self.b)              # summation for derivative with respect to b
-        self.dm = (-2/self.numDatapoints)*self.dm                   # scaling part of derivative with respect to m
-        self.db = (-2/self.numDatapoints)*self.db                   # scaling part of derivative with respect to b
-        self.m = self.m - self.learningRate*self.dm                 # adjust m and b using the derivative values and learning rate
+        for i in range(self.numDatapoints):                                         # for each data point
+            self.dm += self.X[i]*(self.Y[i] - (self.m*self.X[i] + self.b))          # summation part of derivative with respect to m
+            self.db += self.Y[i] - (self.m*self.X[i] + self.b)                      # summation part of derivative with respect to b
+        self.dm = (-2/self.numDatapoints)*self.dm                                   # scaling part of derivative with respect to m
+        self.db = (-2/self.numDatapoints)*self.db                                   # scaling part of derivative with respect to b
+        self.m = self.m - self.learningRate*self.dm                                 # adjust m and b using the derivative values and learning rate
         self.b = self.b - self.learningRate*self.db
         
 
@@ -72,7 +73,7 @@ if "-l" in sys.argv:
     limit = True
 else:
     iterations = 0
-    limit = False # set to true if you would like to limit the iterations 
+    limit = False
 
 if "-lr" in sys.argv:
     learningRate = float(sys.argv[sys.argv.index('-lr') + 1])
@@ -89,47 +90,44 @@ else:
 
 # INITIALIZE THE REGRESSION, INITIALIZE THE PLOT
 LR = Regression(limit, iterations, learningRate, dataDictionary)
-fig, ax = plt.subplots() # create a figure, make ax the only subplot
+fig, ax = plt.subplots()                                # create a figure, make ax the only subplot
 ax.grid()
 dataText = ax.text(0.02, 0.86, 'm = 0\nb = 0\niterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
-X = LR.X
-Y = LR.Y
-line, = ax.plot(X, Y) # starting line is y = minimum y value
+line, = ax.plot(LR.X, LR.predictedLine)                 # starting line is y = minimum y value
 count = 0
 consoleOutput = ""
 
 
 # DEFINE FUNCTIONS USED FOR ANIMATION
-def init(): # Initialize the animation
-    line.set_ydata(LR.m*X) # let y = 0
+def init():                                             # Initialize the animation
     dataText.set_text("m = 0\nb = 0\niterations = 0")
-    return line, dataText # return the line 
+    return line, dataText
 
-def animate(i): # This function determines what changes in each frame
+def animate(i):                                         # This function determines what changes in each frame
     global count, consoleOutput
     displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\niterations = " + str(i)
     if i == iterations and LR.limit == True:
         consoleOutput = displayString
-        ani.event_source.stop() # stop if we reach our iteration count and limit is true
-    LR.learn() # use gradient descent to update m and b
-    line.set_ydata(LR.m*X + LR.b) # reset the line with our new m and b
+        ani.event_source.stop()                         # stop if we reach our iteration count and limit is true
+    LR.learn()                                          # use gradient descent to update m and b
+    line.set_ydata(LR.m*LR.X + LR.b)                    # reset the line with our new m and b
     dataText.set_text(displayString)
     count += 1
-    return line, dataText # return 
+    return line, dataText
 
 
 # BEGIN ANIMATION AND PLOTTING
 ani = animation.FuncAnimation(fig, animate, init_func = init, interval = 1, blit = True)
-plt.plot(X, Y, 'bo') # plot the data points
+plt.plot(LR.X, LR.Y, 'bo')                              # plot the data points
 max_y = np.max(LR.Y)
 min_y = np.min(LR.Y)
 max_x = np.max(LR.X)
 min_x = np.min(LR.X)
-plt.ylim([0, max_y + 0.3*(max_y - min_y)]) # set the limits of the graph depending on our range (extra space added above for labels)
-plt.xlim([0, max_x])
-plt.show() # display the plot an animation
+plt.ylim([min_y - 1, max_y + 0.3*(max_y - min_y)])          # set the limits of the graph depending on our range (extra space added above for labels)
+plt.xlim([min_x - 1, max_x + 1])
+plt.show()                                              # display the plot an animation
+
 # display the final slope, y intercept, and iterations
 if consoleOutput == "":
     consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\niterations = " + str(count)
-
 print(consoleOutput)
