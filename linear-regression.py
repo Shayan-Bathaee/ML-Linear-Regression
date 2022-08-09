@@ -43,10 +43,11 @@ class Regression:
         self.loss = 0
         # self.X = np.array([3,4,5,8])
         # self.Y = np.array([3,4,5,9])
-        self.X = np.array(dataDictionary[xname])
+        self.Xunscaled = np.array(dataDictionary[xname])
+        self.X = self.Xunscaled - np.min(self.Xunscaled)
         self.Y = np.array(dataDictionary[yname])
-        self.X = self.X - np.min(self.X)
-        self.Y = self.Y - np.min(self.Y)
+        # self.X = self.X - np.min(self.X)
+        # self.Y = self.Y - np.min(self.Y)
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
@@ -55,7 +56,8 @@ class Regression:
     def calculateLoss(self):
         self.loss = 0                                                       # initialize the loss to 0
         for i in range(self.numDatapoints):                                 # for each data point
-            self.loss += (self.Y[i] - (self.m*self.X[i] + self.b)) ** 2     # calculate the squared error (actual Y - predicted Y) ^ 2
+            self.loss += (self.Y[i] - (self.m*(self.X[i]) + self.b)) ** 2     # calculate the squared error (actual Y - predicted Y) ^ 2
+
         self.loss = self.loss / self.numDatapoints                          # divide the summation by number of datapoints to get average loss
         return self.loss
 
@@ -135,6 +137,16 @@ max_x = np.max(LR.X)
 min_x = np.min(LR.X)
 plt.ylim([min_y - 1, max_y + 0.3*(max_y - min_y)])          # set the limits of the graph depending on our range (extra space added above for labels)
 plt.xlim([min_x - 1, max_x + 1])
+locs, ticks = plt.xticks()
+print(ticks)
+print(locs)
+print(len(list(LR.X)))
+print(len(list(LR.Xunscaled)))
+ax.set_xticks(list(LR.X), labels=list(LR.Xunscaled))
+if xname:
+    plt.xlabel(xname)
+if yname:
+    plt.ylabel(yname)
 plt.show()                                              # display the plot an animation
 
 # display the final slope, y intercept, and iterations
