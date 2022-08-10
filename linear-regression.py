@@ -1,12 +1,11 @@
 # Overview: This program was written to perform linear regresson on a data set to find the line of best fit. To do so, it uses 
-# gradient descent. Currently, the data is generated randomly.
+# gradient descent.
 # Creation Date: 1/13/2022
 # Author: Shayan Bathaee
 # Concepts were inspired by the following article: https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931
-# along with https://www.geeksforgeeks.org/gradient-descent-in-linear-regression/
+# US GDP data is sourced from https://www.kaggle.com/datasets/alejopaullier/-gdp-by-country-1999-2022
 
 
-from ctypes import wstring_at
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 import numpy as np
@@ -25,7 +24,7 @@ def getDataFromSpreadsheet(filename):
     yvalues = []
     for cell in ws["A"]:
         xvalues.append(cell.value)
-    xvalues.pop(0)                  # pop the name
+    xvalues.pop(0)                          # pop the name
     for cell in ws["B"]:
         yvalues.append(cell.value)
     yvalues.pop(0)
@@ -43,32 +42,34 @@ class Regression:
         self.loss = 0
         self.X = np.array(dataDictionary[xname])
         self.Y = np.array(dataDictionary[yname])
-        self.Xscaled = self.X - np.min(self.X)
+        self.Xscaled = self.X - np.min(self.X)          # used for calculating predicted Y
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
-        self.predictedY = self.m*self.X + self.b        # this stores the data for the predicted line. It just starts as 0
+        self.predictedY = self.m*self.X + self.b        # this stores the data for the predicted line. It just starts as y = np.min(self.Y)
 
+    # calculate mean squared error
     def calculateLoss(self):
-        self.loss = 0                                                       # initialize the loss to 0
-        for i in range(self.numDatapoints):                                 # for each data point
-            self.loss += (self.Y[i] - (self.predictedY[i])) ** 2            # calculate the squared error (actual Y - predicted Y) ^ 2
+        self.loss = 0                                               # initialize the loss to 0
+        for i in range(self.numDatapoints):                         # for each data point
+            self.loss += (self.Y[i] - (self.predictedY[i])) ** 2    # calculate the squared error (actual Y - predicted Y) ^ 2
 
-        self.loss = self.loss / self.numDatapoints                          # divide the summation by number of datapoints to get average loss
+        self.loss = self.loss / self.numDatapoints                  # divide the summation by number of datapoints to get average loss
         return self.loss
 
     def updatePrediction(self):
-        self.predictedY = self.m*self.Xscaled + self.b                      # the prediction has to be calculated using the scaled X values
+        self.predictedY = self.m*self.Xscaled + self.b              # the prediction has to be calculated using the scaled X values
 
+    # use gradient descent to adjust m and b and minimize loss
     def applyGradientDescent(self):
-        self.dm = 0                                                         # initialize derivatives to 0
+        self.dm = 0                                                 # initialize derivatives to 0
         self.db = 0
-        for i in range(self.numDatapoints):                                         # for each data point
-            self.dm += (self.X[i]*(self.Y[i] - self.predictedY[i]))                 # summation part of derivative with respect to m
-            self.db += (self.Y[i] - self.predictedY[i])                             # summation part of derivative with respect to b
-        self.dm = (-2/self.numDatapoints)*self.dm                                   # scaling part of derivative with respect to m
-        self.db = (-2/self.numDatapoints)*self.db                                   # scaling part of derivative with respect to b
-        self.m = self.m - self.learningRate*self.dm                                 # adjust m and b using the derivative values and learning rate
+        for i in range(self.numDatapoints):                         
+            self.dm += (self.X[i]*(self.Y[i] - self.predictedY[i])) # summation part of derivative with respect to m
+            self.db += (self.Y[i] - self.predictedY[i])             # summation part of derivative with respect to b
+        self.dm = (-2/self.numDatapoints)*self.dm                   # scaling part of derivative with respect to m
+        self.db = (-2/self.numDatapoints)*self.db                   # scaling part of derivative with respect to b
+        self.m = self.m - self.learningRate*self.dm                 # adjust m and b using the derivative values and learning rate
         self.b = self.b - self.learningRate*self.db
         self.calculateLoss()
         self.updatePrediction()
@@ -136,9 +137,9 @@ def animate(i):
 
 
 # BEGIN ANIMATION AND PLOTTING
-ani = animation.FuncAnimation(fig, animate, init_func = init, interval = 1, blit = True)
-plt.plot(LR.X, LR.Y, 'ro', mec='black')                                                 # plot the data points
-plt.ylim([np.min(LR.Y) - 1, np.max(LR.Y) + 0.5*(np.max(LR.Y) - np.min(LR.Y))])          # set the limits of the graph depending on our range (extra space added above for labels)
+ani = animation.FuncAnimation(fig, animate, init_func=init, interval=1, blit=True)
+plt.plot(LR.X, LR.Y, 'ro', mec='black')                                         # plot the data points
+plt.ylim([np.min(LR.Y) - 1, np.max(LR.Y) + 0.5*(np.max(LR.Y) - np.min(LR.Y))])  # set the limits of the graph depending on our range (extra space added above for labels)
 plt.xlim([np.min(LR.X) - 1, np.max(LR.X) + 1])
 if xname:
     plt.xlabel(xname)
@@ -146,8 +147,7 @@ if yname:
     plt.ylabel(yname)
 plt.show()
 
-# print the final slope, y intercept, Mean Squared Error, and iterations to console
+# print the final slope, y intercept, mean squared error, and iterations to console
 if consoleOutput == "":
     consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nMSE = " + str(round(LR.loss, 2)) + "\nIterations = " + str(count)
 print(consoleOutput)
-
