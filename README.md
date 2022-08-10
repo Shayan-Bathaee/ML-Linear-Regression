@@ -28,4 +28,5 @@ To quickly review the usage from the command prompt, enter the following command
 `python linear-regression.py -help`
 
 ## Implementation
-To implement this program, I used [this article](https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931) as a conceptual explanation of how linear regression and gradient descent works. After understanding the process, I developed my implementation away from the example code. In the end, I found that my program focused more on OOP and visualization than the article's example.
+To implement this program, I used [this article](https://towardsdatascience.com/linear-regression-using-gradient-descent-97a6c8700931) as a conceptual explanation of how linear regression and gradient descent works. After understanding the process, I developed my implementation away from the example code. My program ended up focusing more on OOP and visualization than the article's example.
+
