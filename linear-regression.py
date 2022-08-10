@@ -41,13 +41,13 @@ class Regression:
         self.iterations = iterations
         self.learningRate = learningRate
         self.loss = 0
-        # self.X = np.array([3,4,5,8])
-        # self.Y = np.array([3,4,5,9])
-        self.Xunscaled = np.array(dataDictionary[xname])
-        self.X = self.Xunscaled - np.min(self.Xunscaled)
-        self.Y = np.array(dataDictionary[yname])
+        self.X = np.array([3,4,5,6])
+        self.Y = np.array([3,4,5,6])
+        # self.X = np.array(dataDictionary[xname])
+        # self.Y = np.array(dataDictionary[yname])
         # self.X = self.X - np.min(self.X)
         # self.Y = self.Y - np.min(self.Y)
+        self.Xscaled = self.X - np.min(self.X)
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
         self.numDatapoints = len(self.X)                # thenumber of X Y pairs we hae
@@ -56,13 +56,13 @@ class Regression:
     def calculateLoss(self):
         self.loss = 0                                                       # initialize the loss to 0
         for i in range(self.numDatapoints):                                 # for each data point
-            self.loss += (self.Y[i] - (self.m*(self.X[i]) + self.b)) ** 2     # calculate the squared error (actual Y - predicted Y) ^ 2
+            self.loss += (self.Y[i] - (self.predictedY[i])) ** 2            # calculate the squared error (actual Y - predicted Y) ^ 2
 
         self.loss = self.loss / self.numDatapoints                          # divide the summation by number of datapoints to get average loss
         return self.loss
 
     def updatePrediction(self):
-        self.predictedY = self.m*self.X + self.b
+        self.predictedY = self.m*self.Xscaled + self.b                      # the prediction has to be calculated using the scaled X values
 
     def applyGradientDescent(self):
         self.dm = 0                                                         # initialize derivatives to 0
@@ -104,7 +104,7 @@ else:
 LR = Regression(limit, iterations, learningRate, dataDictionary)
 fig, ax = plt.subplots()                                # create a figure, make ax the only subplot
 ax.grid()
-dataText = ax.text(0.02, 0.86, 'm = 0\nb = 0\niterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
+dataText = ax.text(0.02, 0.8, 'm = 0\nb = ' + str(round(np.min(LR.Y), 2)) + '\niterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
 line, = ax.plot(LR.X, LR.predictedY)                 # starting line is y = minimum y value
 count = 0
 consoleOutput = ""
@@ -112,12 +112,12 @@ consoleOutput = ""
 
 # DEFINE FUNCTIONS USED FOR ANIMATION
 def init():                                             # Initialize the animation
-    dataText.set_text("m = 0\nb = 0\niterations = 0")
+    dataText.set_text("m = 0\nb = " + str(round(np.min(LR.Y), 2)) + "\niterations = 0")
     return line, dataText
 
 def animate(i):                                         # This function determines what changes in each frame
     global count, consoleOutput
-    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\nloss = " + str(LR.loss) + "\niterations = " + str(i)
+    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nloss = " + str(round(LR.loss,2)) + "\niterations = " + str(i)
     if i == iterations and LR.limit == True:
         consoleOutput = displayString
         ani.event_source.stop()                         # stop if we reach our iteration count and limit is true
@@ -130,19 +130,9 @@ def animate(i):                                         # This function determin
 
 # BEGIN ANIMATION AND PLOTTING
 ani = animation.FuncAnimation(fig, animate, init_func = init, interval = 1, blit = True)
-plt.plot(LR.X, LR.Y, 'bo')                              # plot the data points
-max_y = np.max(LR.Y)
-min_y = np.min(LR.Y)
-max_x = np.max(LR.X)
-min_x = np.min(LR.X)
-plt.ylim([min_y - 1, max_y + 0.3*(max_y - min_y)])          # set the limits of the graph depending on our range (extra space added above for labels)
-plt.xlim([min_x - 1, max_x + 1])
-locs, ticks = plt.xticks()
-print(ticks)
-print(locs)
-print(len(list(LR.X)))
-print(len(list(LR.Xunscaled)))
-ax.set_xticks(list(LR.X), labels=list(LR.Xunscaled))
+plt.plot(LR.X, LR.Y, 'ro', mec='black')                                                 # plot the data points
+plt.ylim([np.min(LR.Y) - 1, np.max(LR.Y) + 0.5*(np.max(LR.Y) - np.min(LR.Y))])          # set the limits of the graph depending on our range (extra space added above for labels)
+plt.xlim([np.min(LR.X) - 1, np.max(LR.X) + 1])
 if xname:
     plt.xlabel(xname)
 if yname:
@@ -151,5 +141,5 @@ plt.show()                                              # display the plot an an
 
 # display the final slope, y intercept, and iterations
 if consoleOutput == "":
-    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b, 2)) + "\nloss = " + str(LR.loss) + "\niterations = " + str(count)
+    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nloss = " + str(round(LR.loss, 2)) + "\niterations = " + str(count)
 print(consoleOutput)
