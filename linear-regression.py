@@ -41,12 +41,8 @@ class Regression:
         self.iterations = iterations
         self.learningRate = learningRate
         self.loss = 0
-        self.X = np.array([3,4,5,6])
-        self.Y = np.array([3,4,5,6])
-        # self.X = np.array(dataDictionary[xname])
-        # self.Y = np.array(dataDictionary[yname])
-        # self.X = self.X - np.min(self.X)
-        # self.Y = self.Y - np.min(self.Y)
+        self.X = np.array(dataDictionary[xname])
+        self.Y = np.array(dataDictionary[yname])
         self.Xscaled = self.X - np.min(self.X)
         self.m = 0
         self.b = np.min(self.Y)                         # initial prediction of the line is y = (min y value)
@@ -76,8 +72,7 @@ class Regression:
         self.b = self.b - self.learningRate*self.db
         self.calculateLoss()
         self.updatePrediction()
-
-        
+    
 
 # DEFINE PARAMETERS
 if "-l" in sys.argv:
@@ -90,7 +85,7 @@ else:
 if "-lr" in sys.argv:
     learningRate = float(sys.argv[sys.argv.index('-lr') + 1])
 else:
-    learningRate = 0.001
+    learningRate = 0.000001
 
 if "-i" in sys.argv:
     filename = str(sys.argv[sys.argv.index('-i') + 1])
@@ -102,22 +97,24 @@ else:
 
 # INITIALIZE THE REGRESSION, INITIALIZE THE PLOT
 LR = Regression(limit, iterations, learningRate, dataDictionary)
-fig, ax = plt.subplots()                                # create a figure, make ax the only subplot
+fig, ax = plt.subplots()                # create a figure, make ax the only subplot
 ax.grid()
-dataText = ax.text(0.02, 0.8, 'm = 0\nb = ' + str(round(np.min(LR.Y), 2)) + '\niterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
-line, = ax.plot(LR.X, LR.predictedY)                 # starting line is y = minimum y value
+dataText = ax.text(0.02, 0.8, 'm = 0\nb = ' + str(round(np.min(LR.Y), 2)) + '\nIterations = 0', transform=ax.transAxes, bbox=dict(facecolor='white', edgecolor='black'))
+line, = ax.plot(LR.X, LR.predictedY)    # starting line is y = minimum y value
 count = 0
 consoleOutput = ""
 
 
 # DEFINE FUNCTIONS USED FOR ANIMATION
-def init():                                             # Initialize the animation
-    dataText.set_text("m = 0\nb = " + str(round(np.min(LR.Y), 2)) + "\niterations = 0")
+# Initialize the animation
+def init():
+    dataText.set_text("m = 0\nb = " + str(round(np.min(LR.Y), 2)) + "\nIterations = 0")
     return line, dataText
 
-def animate(i):                                         # This function determines what changes in each frame
+# Function to execute for each frame
+def animate(i):
     global count, consoleOutput
-    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nloss = " + str(round(LR.loss,2)) + "\niterations = " + str(i)
+    displayString = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nMSE = " + str(round(LR.loss,2)) + "\nIterations = " + str(i)
     if i == iterations and LR.limit == True:
         consoleOutput = displayString
         ani.event_source.stop()                         # stop if we reach our iteration count and limit is true
@@ -137,9 +134,9 @@ if xname:
     plt.xlabel(xname)
 if yname:
     plt.ylabel(yname)
-plt.show()                                              # display the plot an animation
+plt.show()
 
-# display the final slope, y intercept, and iterations
+# print the final slope, y intercept, Mean Squared Error, and iterations to console
 if consoleOutput == "":
-    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nloss = " + str(round(LR.loss, 2)) + "\niterations = " + str(count)
+    consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nMSE = " + str(round(LR.loss, 2)) + "\nIterations = " + str(count)
 print(consoleOutput)
