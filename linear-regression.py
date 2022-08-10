@@ -31,7 +31,7 @@ def getDataFromSpreadsheet(filename):
     yvalues.pop(0)
 
     return {xname: xvalues, yname: yvalues} # dataDictionary input to the regression initializer function
-    
+
 
 # DEFINE CLASS TO PERFORM REGRESSION
 class Regression:
@@ -74,7 +74,17 @@ class Regression:
         self.updatePrediction()
     
 
-# DEFINE PARAMETERS
+# TAKE CONSOLE INPUT
+if "-help" in sys.argv:
+    print("\n\tUSAGE: python linear-regression.py")
+    print("\tFLAGS:")
+    print("\t\t-help        Display this message")
+    print("\t\t-l           Limit the number of iterations to a specified value")
+    print("\t\t-lr          Specify a learning rate")
+    print("\t\t-i           Specify an input file")
+    print("\tSee https://github.com/Shayan-Bathaee/ML-Linear-Regression for more information\n")
+    exit()
+
 if "-l" in sys.argv:
     iterations = int(sys.argv[sys.argv.index('-l') + 1])
     limit = True
@@ -140,3 +150,4 @@ plt.show()
 if consoleOutput == "":
     consoleOutput = "m = " + str(round(LR.m, 2)) + "\nb = " + str(round(LR.b - np.min(LR.Y), 2)) + "\nMSE = " + str(round(LR.loss, 2)) + "\nIterations = " + str(count)
 print(consoleOutput)
+
